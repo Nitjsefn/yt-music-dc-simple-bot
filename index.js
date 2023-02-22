@@ -203,3 +203,25 @@ function skipCommand(msg)
     player.audioPlayer.play(rsc);
     msg.reply(`Now playing:\n***${player.queue[0].songTitle}***`);
 }
+
+function pauseCommand(msg)
+{
+    let player = playersInGuilds.get(msg.guildId);
+    if(!player)
+    {
+        msg.reply("I am not playing anything!");
+        return;
+    }
+    player.audioPlayer.pause(true);
+}
+
+function resumeCommand(msg)
+{
+    let player = playersInGuilds.get(msg.guildId);
+    if(!player)
+    {
+        msg.reply("I am not playing anything!");
+        return;
+    }
+    player.audioPlayer.unpause();
+}
