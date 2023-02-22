@@ -30,6 +30,7 @@ function messageCreateAndUpdateMethod(msg)
         case "pause": pauseCommand(msg); break;
         case "stop": stopCommand(msg); break;
 		case "resume": resumeCommand(msg); break;
+		case "repeat": repeatCommand(msg, arguments); break;
         default: msg.reply("Wrong command!"); break;
     }
 }
@@ -237,4 +238,22 @@ function stopCommand(msg)
     player.audioPlayer.stop();
     player.connection.destroy();
     playersInGuilds.delete(msg.guildId);
+}
+
+function repeatCommand(msg, args)
+{
+    let player = playersInGuilds.get(msg.guildId);
+    if(!player)
+    {
+        msg.reply("I am not playing anything!");
+        return;
+    }
+    switch(args[0])
+    {
+        case "one": player.repeat = 1; msg.reply("Repeat status changed to *one*"); break;
+        case "all": player.repeat = 2; msg.reply("Repeat status changed to *all*"); break;
+        case "none": player.repeat = 0; msg.reply("Repeat status changed to *none*"); break;
+        default: msg.reply("Wrong repeat status!"); return;
+    }
+    playersInGuilds.set(msg.guildId, player);
 }
