@@ -225,3 +225,16 @@ function resumeCommand(msg)
     }
     player.audioPlayer.unpause();
 }
+
+function stopCommand(msg)
+{
+    let player = playersInGuilds.get(msg.guildId);
+    if(!player)
+    {
+        msg.reply("I am not playing anything!");
+        return;
+    }
+    player.audioPlayer.stop();
+    player.connection.destroy();
+    playersInGuilds.delete(msg.guildId);
+}
