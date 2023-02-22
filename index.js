@@ -26,7 +26,7 @@ function messageCreateAndUpdateMethod(msg)
 	{
 		case "play": playCommand(msg, arguments); break;
         case "playlist": playListCommand(msg, arguments); break;
-        case "skip": skipCommand(msg, arguments); break;
+        case "skip": skipCommand(msg); break;
         case "pause": pauseCommand(msg); break;
         case "stop": stopCommand(msg); break;
 		case "resume": resumeCommand(msg); break;
@@ -54,7 +54,7 @@ async function playCommand(msg, args)
     }
     else
     {
-        player = {connection: null, audioPlayer: null, queue: Array(), repeat: 2};
+        player = {connection: null, audioPlayer: null, queue: Array(), repeat: 0};
         player.queue.push({ songTitle: songInfo.videoDetails.title, songUrl: songInfo.videoDetails.video_url });
         player.connection = DCVoice.joinVoiceChannel({channelId: msg.member.voice.channelId, guildId: msg.guildId, adapterCreator: msg.channel.guild.voiceAdapterCreator});
         player.connection.on(DCVoice.VoiceConnectionStatus.Disconnected, (oldState, newState) =>
@@ -129,7 +129,7 @@ async function playListCommand(msg, args)
     }
     else
     {
-        player = {connection: null, audioPlayer: null, queue: Array(), repeat: 2};
+        player = {connection: null, audioPlayer: null, queue: Array(), repeat: 0};
         player.queue.push({ songTitle: songInfo.videoDetails.title, songUrl: songInfo.videoDetails.video_url });
         player.connection = DCVoice.joinVoiceChannel({channelId: msg.member.voice.channelId, guildId: msg.guildId, adapterCreator: msg.channel.guild.voiceAdapterCreator});
         player.connection.on(DCVoice.VoiceConnectionStatus.Disconnected, (oldState, newState) =>
@@ -180,4 +180,26 @@ async function playListCommand(msg, args)
         player.queue.push({ songTitle: songInfo.videoDetails.title, songUrl: songInfo.videoDetails.video_url });
     }
     playersInGuilds.set(msg.guildId, player);
+}
+
+function skipCommand(msg)
+{
+    let player = playersInGuilds.get(msg.guildId);
+    if(!player)
+    {
+        msg.reply("I am not playing anything!");
+        return;
+    }
+    player.audioPlayer.stop();
+    player.queue.shift();
+    if(player.queue.length == 0)
+    {
+        msg.reply("That was the last song in the queue");
+        player.connection.destroy();
+        playersInGuilds.delete(msg.guildId);
+        return;
+    }
+    let rsc = DCVoice.createAudioResource(ytdl(player.queue[0].songUrl, { filter: "audioonly", quality: 'highestaudio', highWaterMark: 1 << 25 }));
+    player.audioPlayer.play(rsc);
+    msg.reply(`Now playing:\n***${player.queue[0].songTitle}***`);
 }
