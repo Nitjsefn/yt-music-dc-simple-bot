@@ -2,11 +2,12 @@
 //Discord.js documentation https://discord.js.org/#/docs/discord.js/main/general/welcome
 const {prefix, token} = require("./config.json");
 const { Client, GatewayIntentBits } = require("discord.js");
-const DCVoice = require("discord-voice");
+const DCVoice = require("@discordjs/voice");
+const ytdl = require("ytdl-core");
 const bot = new Client({ intents: [GatewayIntentBits.Guilds, GatewayIntentBits.GuildMessages, GatewayIntentBits.GuildVoiceStates, GatewayIntentBits.MessageContent] });
 const { log } = console;
 var BOT_NAME;
-
+var playersInGuilds = new Map();
 
 bot.login(token);
 bot.once("ready", () => { log("Bot connected"); BOT_NAME = bot.user.username; });
@@ -28,4 +29,70 @@ function messageCreateAndUpdateMethod(msg)
 		case "resume": resumeCommand(msg); break;
         default: msg.reply("Wrong command!"); break;
     }
+}
+
+async function playCommand(msg, args)
+{
+	if(!msg.member.voice.channelId) { msg.reply("You are not in voice channel"); return; }
+	if(!msg.member.voice.channel.joinable) { msg.reply("I can't join to your voice channel"); return; }
+	if(args.length == 0) { msg.reply("You didn't write the title of song"); return; }
+	let query = '';
+	for(let i = 0; i < args.length; i++) query += `${args[i]} `;
+	let songInfo = await ytdl.getInfo(query);
+    if(!songInfo.videoDetails.video_url)
+    {
+        msg.reply("Unable to find song!");
+        return;
+    }
+    let player = playersInGuilds.get(msg.guildId);
+    if(player)
+    {
+        player.queue.push({ songTitle: songInfo.videoDetails.title, songUrl: songInfo.videoDetails.video_url });
+    }
+    else
+    {
+        player = {connection: null, audioPlayer: null, queue: Array(), repeat: 2};
+        player.queue.push({ songTitle: songInfo.videoDetails.title, songUrl: songInfo.videoDetails.video_url });
+        player.connection = DCVoice.joinVoiceChannel({channelId: msg.member.voice.channelId, guildId: msg.guildId, adapterCreator: msg.channel.guild.voiceAdapterCreator});
+        player.connection.on(DCVoice.VoiceConnectionStatus.Disconnected, (oldState, newState) =>
+		{
+			if(playersInGuilds.has(msg.guildId)) playersInGuilds.delete(msg.guildId);
+			let conn = DCVoice.getVoiceConnection(msg.guildId);
+			if(!conn) { msg.reply("I am not in the voice channel!"); return; }
+			conn.destroy();
+		});
+        player.audioPlayer = DCVoice.createAudioPlayer({ behaviors: { noSubscriber: DCVoice.NoSubscriberBehavior.Pause } });
+        player.audioPlayer.addListener("stateChange", (oldOne, newOne) =>
+		{
+			if (newOne.status == "idle")
+			{
+				if(!playersInGuilds.has(msg.guildId)) { msg.reply("I am not playing anything!"); return; }
+                let player = playersInGuilds.get(msg.guildId);
+                if(player.repeat == 0) //None repeat
+                {
+                    player.queue.shift();
+                    if(player.queue.length == 0)
+                    {
+                        player.audioPlayer.stop();
+                        player.connection.destroy();
+                        playersInGuilds.delete(msg.guildId);
+                        msg.reply("Nothing to play anymore");
+                        return;
+                    }
+                }
+                else if(player.repeat == 2) //Repeat all
+                {
+                    player.queue.push(player.queue.shift());
+                }
+                let rsc = DCVoice.createAudioResource(ytdl(player.queue[0].songUrl, { filter: "audioonly", quality: 'highestaudio', highWaterMark: 1 << 25 }));
+                player.audioPlayer.play(rsc);
+                msg.reply(`Now playing:\n***${player.queue[0].songTitle}***`);
+			}
+		});
+        player.connection.subscribe(player.audioPlayer);
+        let rsc = DCVoice.createAudioResource(ytdl(player.queue[0].songUrl, { filter: "audioonly", quality: 'highestaudio', highWaterMark: 1 << 25 }));
+        player.audioPlayer.play(rsc);
+        msg.reply(`Now playing:\n***${player.queue[0].songTitle}***`);
+    }
+    playersInGuilds.set(msg.guildId, player);
 }
