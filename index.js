@@ -58,7 +58,7 @@ async function playCommand(msg, args)
         player = {connection: null, audioPlayer: null, queue: Array(), repeat: 0};
         player.queue.push({ songTitle: songInfo.videoDetails.title, songUrl: songInfo.videoDetails.video_url });
         player.connection = DCVoice.joinVoiceChannel({channelId: msg.member.voice.channelId, guildId: msg.guildId, adapterCreator: msg.channel.guild.voiceAdapterCreator});
-        //added as quick fix for music playing only for couple of seconds
+/*      //added as quick fix for music playing only for couple of seconds
         //{
         player.connection.on("stateChange", (oldState, newState) =>
         {
@@ -67,7 +67,7 @@ async function playCommand(msg, args)
                 player.connection.configureNetworking();
             }
         });
-        //}
+        //}*/
         player.connection.on(DCVoice.VoiceConnectionStatus.Disconnected, (oldState, newState) =>
 		{
 			if(playersInGuilds.has(msg.guildId)) playersInGuilds.delete(msg.guildId);
@@ -143,16 +143,16 @@ async function playListCommand(msg, args)
         player = {connection: null, audioPlayer: null, queue: Array(), repeat: 0};
         player.queue.push({ songTitle: songInfo.videoDetails.title, songUrl: songInfo.videoDetails.video_url });
         player.connection = DCVoice.joinVoiceChannel({channelId: msg.member.voice.channelId, guildId: msg.guildId, adapterCreator: msg.channel.guild.voiceAdapterCreator});
-        //added as quick fix for music playing only for couple of seconds
+/*      //added as quick fix for music playing only for couple of seconds
         //{
-            player.connection.on("stateChange", (oldState, newState) =>
+        player.connection.on("stateChange", (oldState, newState) =>
+        {
+            if (oldState.status === DCVoice.VoiceConnectionStatus.Ready && newState.status === DCVoice.VoiceConnectionStatus.Connecting)
             {
-                if (oldState.status === DCVoice.VoiceConnectionStatus.Ready && newState.status === DCVoice.VoiceConnectionStatus.Connecting)
-                {
-                    player.connection.configureNetworking();
-                }
-            });
-            //}
+                player.connection.configureNetworking();
+            }
+        });
+        //}*/
         player.connection.on(DCVoice.VoiceConnectionStatus.Disconnected, (oldState, newState) =>
 		{
 			if(playersInGuilds.has(msg.guildId)) playersInGuilds.delete(msg.guildId);
