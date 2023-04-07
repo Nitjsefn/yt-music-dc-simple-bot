@@ -5,6 +5,7 @@ const { Client, GatewayIntentBits } = require("discord.js");
 const DCVoice = require("@discordjs/voice");
 const ytdl = require("ytdl-core");
 const { execSync } = require("child_process");
+const ytS = require("yt-search");
 const bot = new Client({ intents: [GatewayIntentBits.Guilds, GatewayIntentBits.GuildMessages, GatewayIntentBits.GuildVoiceStates, GatewayIntentBits.MessageContent] });
 const { log } = console;
 var BOT_NAME;
@@ -42,6 +43,13 @@ async function playCommand(msg, args)
 	if(args.length == 0) { msg.reply("You didn't write the title of song"); return; }
 	let query = '';
 	for(let i = 0; i < args.length; i++) query += `${args[i]} `;
+    if(query.startsWith("http") == false)
+    {
+        let vids = await ytS(query);
+        let i = 0;
+        while(vids.all[i].type !== "video") i++;
+        query = vids.all[i].url;
+    }
 	let songInfo = await ytdl.getInfo(query);
     if(!songInfo.videoDetails.video_url)
     {
