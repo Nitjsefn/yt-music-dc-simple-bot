@@ -3,7 +3,7 @@
 const {prefix, token} = require("./config.json");
 const { Client, GatewayIntentBits } = require("discord.js");
 const DCVoice = require("@discordjs/voice");
-const ytdl = require("ytdl-core");
+const ytdl = require("@distube/ytdl-core");
 const { execSync } = require("child_process");
 const ytS = require("yt-search");
 const bot = new Client({ intents: [GatewayIntentBits.Guilds, GatewayIntentBits.GuildMessages, GatewayIntentBits.GuildVoiceStates, GatewayIntentBits.MessageContent] });
