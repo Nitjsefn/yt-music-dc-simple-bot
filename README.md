@@ -4,12 +4,12 @@ As the repo name states `simple`, it is very basic and quickly written (about 2 
 
 ## Table of Contents
 
-- (Requirements)[#requirements]
-- (Installation)[#installation]
-- (Run)[#run]
-- (Usage)[#usage]
-- (List of Commands)[#list-of-commands]
-- (Discord Commands Example)[#discord-commands-example]
+- [Requirements](#requirements)
+- [Installation](#installation)
+- [Run](#run)
+- [Usage](#usage)
+- [List of Commands](#list-of-commands)
+- [Discord Commands Example](#discord-commands-example)
 
 ## Requirements
 
