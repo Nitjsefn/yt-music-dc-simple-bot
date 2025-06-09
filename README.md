@@ -1,10 +1,15 @@
-<div align="center">
-	# YouTube Music Bot for Discord
-</div>
-
---
+<h1 align="center"> YouTube Music Bot for Discord </h1>
 
 As the repo name states `simple`, it is very basic and quickly written (about 2 evenings) bot for Discord that can play music from youtube. Originally, it was created as side hustle (not having much of free time to spend on it), for my friends to be able to listen to music from youtube on discord, so it may have a lot of bugs and shortcomings, but it does what it was "designed" to do.
+
+## Table of Contents
+
+- (Requirements)[#requirements]
+- (Installation)[#installation]
+- (Run)[#run]
+- (Usage)[#usage]
+- (List of Commands)[#list-of-commands]
+- (Discord Commands Example)[#discord-commands-example]
 
 ## Requirements
 
